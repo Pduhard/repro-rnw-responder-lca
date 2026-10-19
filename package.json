@@ -1,0 +1,22 @@
+{
+  "name": "repro-rnw-responder-lca",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "unit": "node unit.cjs",
+    "dev": "vite",
+    "e2e": "node e2e.mjs",
+    "fix": "node fix.mjs",
+    "unfix": "node fix.mjs --revert"
+  },
+  "dependencies": {
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "react-native-web": "0.21.4"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "5.1.1",
+    "playwright-core": "1.56.1",
+    "vite": "7.2.4"
+  }
+}
