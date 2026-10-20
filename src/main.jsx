@@ -2,8 +2,11 @@ import { useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { PanResponder, Text, View } from "react-native";
 
-// A parent that wants to take over a horizontal drag, over two sibling
-// children that each become the responder when a press starts on them.
+const SIZE = 150;
+
+// A parent that takes over a horizontal drag longer than A is wide, so only
+// while the pointer is over B. Its two children, A and B, each become the
+// responder when a press starts on them.
 function App() {
   const [log, setLog] = useState([]);
   const push = (line) => setLog((lines) => [...lines, line]);
@@ -14,7 +17,7 @@ function App() {
     PanResponder.create({
       onMoveShouldSetPanResponder: (_e, { dx }) => {
         pushRef.current(`parent asked, dx=${Math.round(dx)}`);
-        return Math.abs(dx) > 10;
+        return Math.abs(dx) > SIZE;
       },
       onPanResponderGrant: () => pushRef.current("parent granted"),
       onPanResponderRelease: (_e, { dx }) => pushRef.current(`parent released, dx=${Math.round(dx)}`),
@@ -27,7 +30,7 @@ function App() {
       onStartShouldSetResponder={() => true}
       onResponderGrant={() => push(`${label} granted`)}
       onResponderTerminate={() => push(`${label} terminated`)}
-      style={{ width: 150, height: 150, backgroundColor: color, justifyContent: "center" }}
+      style={{ width: SIZE, height: SIZE, backgroundColor: color, justifyContent: "center" }}
     >
       <Text style={{ textAlign: "center" }}>{label}</Text>
     </View>

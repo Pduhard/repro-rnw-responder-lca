@@ -1,6 +1,8 @@
 # react-native-web: a move onto a sibling of the responder never asks their parent
 
-A press starts on `A`, and `A` becomes the responder. The mouse moves onto `B`, a sibling of `A`. Their parent has `onMoveShouldSetResponder` (here through `PanResponder`). It is never called, so it can never take the gesture. A move that stays on `A` does ask it.
+A press starts on `A`, and `A` becomes the responder. The mouse moves onto `B`, a sibling of `A`. Their parent has `onMoveShouldSetResponder` (here through `PanResponder`). It is asked on every move over `A`, but never once the pointer is over `B`, so it can never take the gesture there.
+
+In the demo, the parent takes a drag only once it is longer than `A` is wide (150px), so only while the pointer is over `B`.
 
 It happens when:
 
@@ -11,38 +13,40 @@ It happens when:
 
 ```sh
 npm install
-npm run dev    # open the page, press on A, drag onto B
+npm run dev    # open the page, press on the middle of A, drag slowly onto B, watch the log
 npm run unit   # getLowestCommonAncestor on hand-made paths
 node fuzz.cjs  # getLowestCommonAncestor against a naive reference, 40,000 seeded random pairs
-npm run e2e    # both drags in Chrome (system Chrome, or CHROME_PATH)
+npm run e2e    # the same drag in Chrome, in small steps (system Chrome, or CHROME_PATH)
 npm run fix    # apply the fix to node_modules, then run them again
 npm run unfix  # back to react-native-web as published
 ```
 
 ## Expected
 
+The parent is asked on every move, over `A` and then over `B`, and takes the gesture once the drag is longer than `A`:
+
 ```
-drag within A (control): parent asked
+drag from A onto B: parent granted
   A granted
-  parent asked, dx=32
+  parent asked, dx=5
+  ...
+  parent asked, dx=150
+  parent asked, dx=155
   A terminated
   parent granted
-  parent released, dx=98
-drag from A onto B: parent asked
-  A granted
-  parent asked, dx=40
-  A terminated
-  parent granted
-  parent released, dx=120
+  parent released, dx=70
 ```
 
 ## Actual (react-native-web 0.21.4)
 
+`parent asked` stops as soon as the pointer leaves `A` (the last line is over the gap between `A` and `B`, which is the parent itself). Nothing more is logged while the pointer is over `B`:
+
 ```
-drag within A (control): parent asked
-  ...
-drag from A onto B: parent NEVER asked
+drag from A onto B: parent NEVER granted
   A granted
+  parent asked, dx=5
+  ...
+  parent asked, dx=90
 ```
 
 `npm run unit` (FAIL lines):
