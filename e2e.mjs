@@ -3,11 +3,16 @@ import { createServer } from "vite";
 
 // Press on A, then drag. While the pointer moves over A, the parent is asked.
 // Once each move lands on B, a sibling of A, the parent is never asked.
-const server = await createServer({ server: { port: 5199, strictPort: true }, logLevel: "error" });
-await server.listen();
-const browser = await chromium.launch({
-  executablePath: process.env.CHROME_PATH ?? "/usr/bin/google-chrome-stable",
+// force: re-bundle react-native-web, so `npm run fix` takes effect
+const server = await createServer({
+  optimizeDeps: { force: true },
+  server: { port: 5199, strictPort: true },
+  logLevel: "error",
 });
+await server.listen();
+const browser = await chromium.launch(
+  process.env.CHROME_PATH ? { executablePath: process.env.CHROME_PATH } : { channel: "chrome" },
+);
 const page = await browser.newPage();
 
 async function drag(name, fromX, toX, steps) {
