@@ -13,7 +13,7 @@ It happens when:
 
 ```sh
 npm install
-npm run dev    # open the page, press on the middle of A, drag slowly onto B, watch the log
+npm run dev    # open the page, press on the middle of A, drag slowly to the far side of B, watch the log
 npm run unit   # getLowestCommonAncestor on hand-made paths
 node fuzz.cjs  # getLowestCommonAncestor against a naive reference, 40,000 seeded random pairs
 npm run e2e    # the same drag in Chrome, in small steps (system Chrome, or CHROME_PATH)
@@ -23,15 +23,17 @@ npm run unfix  # back to react-native-web as published
 
 ## Expected
 
-The parent is asked on every move, over `A` and then over `B`, and takes the gesture once the drag is longer than `A`:
+Each `parent asked` line names the view under the pointer: `A`, `B`, or `parent` for the gap between them. The parent is asked on every move, over `A` and then over `B`, and takes the gesture once the drag is longer than `A`:
 
 ```
 drag from A onto B: parent granted
   A granted
-  parent asked, dx=5
+  parent asked, dx=5, over A
   ...
-  parent asked, dx=150
-  parent asked, dx=155
+  parent asked, dx=90, over parent
+  parent asked, dx=95, over B
+  ...
+  parent asked, dx=155, over B
   A terminated
   parent granted
   parent released, dx=70
@@ -39,14 +41,14 @@ drag from A onto B: parent granted
 
 ## Actual (react-native-web 0.21.4)
 
-`parent asked` stops as soon as the pointer leaves `A` (the last line is over the gap between `A` and `B`, which is the parent itself). Nothing more is logged while the pointer is over `B`:
+No `parent asked` line is ever `over B`:
 
 ```
 drag from A onto B: parent NEVER granted
   A granted
-  parent asked, dx=5
+  parent asked, dx=5, over A
   ...
-  parent asked, dx=90
+  parent asked, dx=90, over parent
 ```
 
 `npm run unit` (FAIL lines):

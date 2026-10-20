@@ -15,8 +15,9 @@ function App() {
 
   const [pan] = useState(() =>
     PanResponder.create({
-      onMoveShouldSetPanResponder: (_e, { dx }) => {
-        pushRef.current(`parent asked, dx=${Math.round(dx)}`);
+      onMoveShouldSetPanResponder: (e, { dx }) => {
+        const over = e.target.closest("[data-testid]").dataset.testid;
+        pushRef.current(`parent asked, dx=${Math.round(dx)}, over ${over}`);
         return Math.abs(dx) > SIZE;
       },
       onPanResponderGrant: () => pushRef.current("parent granted"),
